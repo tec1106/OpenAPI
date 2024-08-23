@@ -1,0 +1,3083 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "V1",
+    "title": "Element Logic eManager REST API",
+    "x-swagger-net-version": "8.3.24.301"
+  },
+  "host": "localhost",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/api/directputaway": {
+      "post": {
+        "tags": [
+          "DirectPutaway"
+        ],
+        "summary": "Place a product directly into a location.",
+        "description": "The direct putaway endpoint offers a way to tell eManager that a product is placed in a given location. This is used to bypass the regular inbound process.",
+        "operationId": "ProductPlace",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "putaway",
+            "in": "body",
+            "description": "Offers a single operation of placing a product into a location.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DirectPutaway"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product placed successfully"
+          },
+          "400": {
+            "description": "The location is not found. ",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/goodsreceivals/{id}/lines/{lineId}": {
+      "put": {
+        "tags": [
+          "GoodsReceivals"
+        ],
+        "summary": "Complete or delete putaway tasks for a purchase line ID.<br />",
+        "description": "If the task status is below *PutInBox (5)*, it will be deleted.\r\nIf it is *PutInBox (5)* or higher, it will be set to *Completed (17)*.",
+        "operationId": "CompleteGoodsReceival",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Purchase order ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "description": "Purchase line ID. The purchase line to complete.",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Putaway tasks are completed"
+          },
+          "400": {
+            "description": "Arguments not valid",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "404": {
+            "description": "No putaway order lines found for the given purchase ID",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "GoodsReceivals"
+        ],
+        "summary": "Delete a goods receival order line",
+        "operationId": "DeleteGoodsReceival",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Purchase order ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "description": "Purchase line ID. The purchase line to delete.",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Purchase order line deleted successfully"
+          },
+          "400": {
+            "description": "Arguments not valid",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "404": {
+            "description": "Purchase order line not found",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/goodsreceivals/import": {
+      "post": {
+        "tags": [
+          "GoodsReceivalsImport"
+        ],
+        "summary": "Imports a goods receival list into the system.",
+        "operationId": "ImportGoodsReceival",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ImportOperationOfGoodsReceivalLine"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "202": {
+            "description": "The goods receival import is started."
+          },
+          "400": {
+            "description": "BadRequest. Either there was no lines present in the request or the lines could not be parsed."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/importrouter": {
+      "post": {
+        "tags": [
+          "ImportRouter"
+        ],
+        "summary": "Routes the request message to the configured endpoint. See documentation on how to configure this.",
+        "operationId": "RouteImportMessage",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "202": {
+            "description": "Message is routed to correct endpoint and import started."
+          },
+          "400": {
+            "description": "BadRequest. Either there was no content in the request or the content could not be parsed."
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/integrationstatus/{id}": {
+      "get": {
+        "tags": [
+          "IntegrationStatus"
+        ],
+        "summary": "Get integration transaction by id.",
+        "description": "Will return the integration status when given a valid integration transaction id. \r\n\r\nStatuses:\r\n**ExportCreated** - We have created an entry for the integration transaction\r\n**Started** - The integration transaction is started\r\n**Ok** - The integration transaction was completed successfully\r\n**Error** - The integration transaction failed",
+        "operationId": "GetIntegrationTransaction",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The integration transaction id.",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok. The integration transaction is returned."
+          },
+          "404": {
+            "description": "Not found. The integration transaction does not exist."
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/inventorycounts/import": {
+      "post": {
+        "tags": [
+          "InventoryCountImport"
+        ],
+        "summary": "Imports inventory count list into the system.",
+        "operationId": "ImportInventoryCount",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ImportOperationOfInventoryLine"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "202": {
+            "description": "Inventory count import is started."
+          },
+          "400": {
+            "description": "BadRequest. Either there was no inventory count lines present in the request or the lines could not be parsed."
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/inventoryitems": {
+      "patch": {
+        "tags": [
+          "InventoryItems"
+        ],
+        "summary": "Apply updates to all locations matching filter.",
+        "description": "The message is a JSON object consisting of two fields: Filter and Updates.\r\nAllocation data will be updated with the given Updates data for all locations matching the Filter criteria.\r\n            \r\nThe API will not perform any reallocation. All existing allocations will be kept as is.Only new orders will be impacted by the update.\r\n            \r\nThe Filter section is required, and must at minimum include a SkuNumber or HandlingUnit (or both).\r\nEither SkuNumber or HandlingUnit (or both) is required for the Filter.\r\n            \r\nSending a message without the optional Updates section can be useful for testing the API.\r\nSending in an empty string \"\" as the value for a field in the Updates section will clear that field.",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "produces": [
+          "application/json",
+          "application/problem+json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "updateAllocationData",
+            "in": "body",
+            "description": "JSON containing a Filter and a set of Updates. Applies Updates to all locations matching Filter.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AllocationDataChanges"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The products matching your filter (if any) have been updated.",
+            "schema": {
+              "$ref": "#/definitions/UpdateAllocationDataResponse"
+            },
+            "examples": {
+              "application/json": "{\r\n  \"totalMatches\": 1,\r\n  \"totalUpdates\": 0\r\n}"
+            }
+          },
+          "400": {
+            "description": "Either there was a problem parsing your request, or your values were not acceptable.",
+            "examples": {
+              "application/problem+json": "{\r\n  \"errors\": {\r\n    \"updateAllocationData\": [\r\n      \"Missing field: SkuNumber or HandlingUnit required\"\r\n    ]\r\n  },\r\n  \"type\": \"https://httpstatuses.com/400\",\r\n  \"title\": \"The request is not valid\",\r\n  \"status\": 400\r\n}"
+            }
+          },
+          "404": {
+            "description": "Product not found.",
+            "examples": {
+              "application/problem+json": "{\r\n  \"type\": \"https://httpstatuses.com/404\",\r\n  \"title\": \"Product not found\",\r\n  \"status\": 404,\r\n  \"detail\": \"Product with SkuNumber '983275987234678' not found\"\r\n}"
+            }
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/inventoryitems/Lock": {
+      "post": {
+        "tags": [
+          "InventoryItems"
+        ],
+        "operationId": "Lock",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "lockProductsForPicking",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LockProductsForPickingRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "207": {
+            "description": "One or more request failed. Check response for details",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ProblemDetails"
+              },
+              "xml": {
+                "name": "ProblemDetails",
+                "wrapped": true
+              },
+              "type": "array"
+            }
+          },
+          "400": {
+            "description": "Locking of all the products failed",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/inventoryitems/UnLock": {
+      "post": {
+        "tags": [
+          "InventoryItems"
+        ],
+        "operationId": "UnLock",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "unLockProductsForPicking",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnlockProductsForPickingRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "207": {
+            "description": "One or more request failed. Check response for details",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ProblemDetails"
+              },
+              "xml": {
+                "name": "ProblemDetails",
+                "wrapped": true
+              },
+              "type": "array"
+            }
+          },
+          "400": {
+            "description": "Unlocking of all the products failed",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/inventoryitems/RemoveStockItemReservationKey": {
+      "post": {
+        "tags": [
+          "InventoryItems"
+        ],
+        "operationId": "RemoveStockItemReservationKey",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "removeStockItemReservationKey",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RemoveStockItemReservationKeyRequestModel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The operation is succeeded"
+          },
+          "400": {
+            "description": "No Stock Items found",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/inventoryitems/{locationCode}": {
+      "delete": {
+        "tags": [
+          "InventoryItems"
+        ],
+        "operationId": "InventoryItems_DeleteInventoryItemOnLocation",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "locationCode",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deletion was successful"
+          },
+          "400": {
+            "description": "The location has no stock",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "404": {
+            "description": "The location is not found",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "409": {
+            "description": "The location contains reserved stock",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/messageroutings/{routingName}": {
+      "post": {
+        "tags": [
+          "MessageRoutings"
+        ],
+        "summary": "Transforms and forwards a request to a configured endpoint",
+        "description": "Sample content of a request\r\n{\r\n\"extPicklistId\": \"Picklist1\",\r\n\"extProductId\": \"iPhone 99\",\r\n\"quantity\": 1.5\r\n}",
+        "operationId": "RouteMessage",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "application/problem+json",
+          "application/problem+json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "routingName",
+            "in": "path",
+            "description": "The name of the routing to be used for the request. Routings are specified in the\r\nIntegration.MessageRoutingConfiguration configuration parameter",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request is transformed and routed to the configured endpoint"
+          },
+          "400": {
+            "description": "Either there was no content in the request or the content contains invalid data"
+          },
+          "415": {
+            "description": "The content type is not application/json"
+          },
+          "500": {
+            "description": "An unexpected error occurred"
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/picklists/{id}/lines/{lineId}": {
+      "delete": {
+        "tags": [
+          "PickListLines"
+        ],
+        "summary": "Deletes one picklist line.",
+        "description": "Id is the same as the ExtPicklistId from the import and lineId is the same as ExtOrderLineId from the import.",
+        "operationId": "DeletePicklistLine",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Picklist ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "description": "Picklist line ID. The picklist line to delete.",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "403": {
+            "description": "Forbidden. The requested picklist line could not be deleted since the picklist is in the process of being picked"
+          },
+          "404": {
+            "description": "NotFound. The requested picklist line could not be found"
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/picklists/{extPicklistId}/lines/{extOrderLineId}/complete": {
+      "post": {
+        "tags": [
+          "PickListLines"
+        ],
+        "summary": "Completes one picklist line.",
+        "description": "ExtPicklistId and ExtOrderLineId is the same as from the import.",
+        "operationId": "CompletePicklistLine",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "extPicklistId",
+            "in": "path",
+            "description": "Picklist ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "extOrderLineId",
+            "in": "path",
+            "description": "Orderline ID. The orderline to delete.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok. The picklist line is completed"
+          },
+          "400": {
+            "description": "Arguments not valid",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "404": {
+            "description": "NotFound. The requested picklist line could not be found"
+          },
+          "409": {
+            "description": "Conflict. The picklist line is already completed or is currently being picked"
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/picklists/{id}": {
+      "delete": {
+        "tags": [
+          "PickLists"
+        ],
+        "summary": "Deletes one picklist.",
+        "description": "Picklist ID is the same as the ExtPicklistId which was supplied in the import.",
+        "operationId": "DeletePicklist",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Picklist ID. The id of the picklist to delete.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "403": {
+            "description": "Forbidden. The requested picklist could not be deleted since the picklist is in the process of being picked"
+          },
+          "404": {
+            "description": "NotFound. The requested picklist could not be found"
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/picklists/{extPicklistId}/complete": {
+      "post": {
+        "tags": [
+          "PickLists"
+        ],
+        "summary": "Completes one picklist.",
+        "description": "Picklist ID is the same as the ExtPicklistId which was supplied in the import.",
+        "operationId": "CompletePicklist",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "extPicklistId",
+            "in": "path",
+            "description": "Picklist ID. The id of the picklist to complete.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "description": "Defines a command that asynchronously creates an {System.Net.Http.HttpResponseMessage}.",
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Arguments not valid",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "404": {
+            "description": "NotFound. The requested picklist could not be found"
+          },
+          "409": {
+            "description": "The picklist is completed"
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/picklists/import": {
+      "post": {
+        "tags": [
+          "PicklistsImport"
+        ],
+        "summary": "Imports one picklist into the system.",
+        "operationId": "ImportPicklist",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ImportOperationOfPickListLineImport"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "202": {
+            "description": "Picklist import is started."
+          },
+          "400": {
+            "description": "BadRequest. Either there was no picklist lines present in the request or the lines could not be parsed."
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/pickwaves": {
+      "get": {
+        "tags": [
+          "Pickwaves"
+        ],
+        "summary": "Returns all pickwaves",
+        "operationId": "GetPickwaves",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok. All the configured pickwaves is returned."
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/pickwaves/{pickwaveId}": {
+      "get": {
+        "tags": [
+          "Pickwaves"
+        ],
+        "summary": "Returns one pickwave",
+        "operationId": "GetPickwave",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "pickwaveId",
+            "in": "path",
+            "description": "The pickwave id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok. The requested pickwave is returned."
+          },
+          "400": {
+            "description": "BadRequest. The parameter could not be parsed."
+          },
+          "404": {
+            "description": "NotFound. The requested pickwave was not found."
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/products/{productId}/scancodes/add": {
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Adds additional scan codes to existing product without affecting any existing codes on the product.\r\nExisting codes with \"Unknown\" type will get their type updated if the code is added with a different type specified.",
+        "operationId": "AddProductScanCodes",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "SKU of the product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "scanCodes",
+            "in": "body",
+            "description": "Collection of scan codes to add to the product",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ScanCodes"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. The scan codes were accepted and added to the product."
+          },
+          "400": {
+            "description": "BadRequest. Either no scan codes where provided or one or more of the scan codes were empty or with invalid type."
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/products/{extProductId}": {
+      "delete": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Deletes one product from the system if possible.",
+        "operationId": "DeleteProduct",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "extProductId",
+            "in": "path",
+            "description": "Id of the product to be deleted",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. The product has been successfully deleted from the system."
+          },
+          "400": {
+            "description": "BadRequest. Unable to delete product."
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/products/import": {
+      "post": {
+        "tags": [
+          "ProductsImport"
+        ],
+        "summary": "Imports product list into the system.",
+        "operationId": "ProductImport",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ImportOperationOfProductLine"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "202": {
+            "description": "Product import is started."
+          },
+          "400": {
+            "description": "BadRequest. Either there was no product lines present in the request or the lines could not be parsed."
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "operationId": "Root_Get",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "description": "Defines a command that asynchronously creates an {System.Net.Http.HttpResponseMessage}.",
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/unpreparedrefillactivities": {
+      "get": {
+        "tags": [
+          "UnpreparedRefillActivities"
+        ],
+        "summary": "Returns all unprepared refill activities",
+        "operationId": "GetUnpreparedRefillActivities",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all unprepared refill orders is returned"
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    },
+    "/api/unpreparedrefillactivities/{id}": {
+      "get": {
+        "tags": [
+          "UnpreparedRefillActivities"
+        ],
+        "summary": "Returns one unprepared refill activity",
+        "operationId": "GetUnpreparedRefillActivity",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "External Order Id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Given refill order info is returned"
+          },
+          "404": {
+            "description": "No refill activity found for given ID"
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "UnpreparedRefillActivities"
+        ],
+        "summary": "Prepares one refill activity",
+        "operationId": "PrepareRefillActivity",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/problem+json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "External Order Id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Given refill order has been prepared"
+          },
+          "404": {
+            "description": "No refill activity found for given ID"
+          }
+        },
+        "security": [
+          {
+            "Basic": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "DirectPutaway": {
+      "required": [
+        "TransactionId",
+        "LocationCode",
+        "SkuNumber"
+      ],
+      "properties": {
+        "TransactionId": {
+          "description": "A unique ID for this transaction",
+          "example": "12345",
+          "type": "string"
+        },
+        "LocationCode": {
+          "description": "The bin ID with the location code the item is put into.",
+          "example": "AS-10008-02-01",
+          "type": "string"
+        },
+        "TaskListId": {
+          "description": "Maps to 'Ext.OrderID'. If a valid TaskListId and TaskLineId is provided and the quantity matches the task line’s quantity, the task line will be marked as completed and closed. If there is no match, the direct putaway will be performed and registered as performed with the optional ID's provided.",
+          "example": "123ABC",
+          "type": "string"
+        },
+        "TaskLineId": {
+          "description": "Maps to 'Ext.OrderLineID'. If a valid TaskListId and TaskLineId is provided and the quantity matches the task line’s quantity, the task line will be marked as completed and closed. If there is no match, the direct putaway will be performed and registered as performed with the optional ID's provided.",
+          "example": "123ABC",
+          "type": "string"
+        },
+        "SkuNumber": {
+          "description": "Maps to Ext.ProductId. The ID of the products stored",
+          "example": "123ABC",
+          "type": "string"
+        },
+        "Quantity": {
+          "description": "The number if items stored",
+          "example": "120",
+          "type": "number",
+          "format": "double"
+        },
+        "UserCode": {
+          "description": "The ID of the user performing the putaway",
+          "example": "12345",
+          "type": "string"
+        },
+        "BatchId": {
+          "description": "Used to assign the products with a batch ID. Used for picking. A picklist can contain a batch ID to make sure a specific product batch is picked.",
+          "example": "12345",
+          "type": "string"
+        },
+        "LotNumber": {
+          "description": "Lot numbers are used to track items throughout the manufacturing process and can be used to identify recalled items or products with defects",
+          "example": "12345",
+          "type": "string"
+        },
+        "ExpiryDate": {
+          "description": "Used to track the Expiry Date of products.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "Returned": {
+          "description": "Used to track if the item is a return",
+          "example": "12345",
+          "type": "boolean"
+        },
+        "IsAvailable": {
+          "description": "    Locks a product for reservation. All existing reservations will be removed. Use the *unlock* API to unlock. \r\n\r\nUseful for locking items while they are outside AutoStore when using an external putaway process.",
+          "example": "false",
+          "type": "boolean"
+        },
+        "StockReservationKey": {
+          "description": "Specify a Stock Reservation Key. If included, the item can only be picked if its stock reservation key is included in a picklist.",
+          "example": "12345",
+          "type": "string"
+        },
+        "CustomAllocationData": {
+          "description": "Used for non standard properties, e.g. country of origin or color.",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "example": "12345",
+          "type": "object"
+        }
+      },
+      "xml": {
+        "name": "DirectPutaway"
+      },
+      "type": "object"
+    },
+    "ProblemDetails": {
+      "description": "A machine-readable format for specifying errors in HTTP API responses based on https://tools.ietf.org/html/rfc7807.",
+      "properties": {
+        "type": {
+          "description": "A URI reference [RFC3986] that identifies the problem type. This specification encourages that, when\r\ndereferenced, it provides human-readable documentation for the problem type\r\n(e.g., using HTML [W3C.REC-html5-20141028]). When this member is not present, its value is assumed to be\r\n\"about:blank\".",
+          "type": "string"
+        },
+        "title": {
+          "description": "A short, human-readable summary of the problem type.It SHOULD NOT change from occurrence to occurrence\r\nof the problem, except for purposes of localization(e.g., using proactive content negotiation;\r\nsee[RFC7231], Section 3.4).",
+          "type": "string"
+        },
+        "status": {
+          "description": "The HTTP status code([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "detail": {
+          "description": "A human-readable explanation specific to this occurrence of the problem.",
+          "type": "string"
+        },
+        "instance": {
+          "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information\r\nif dereferenced.",
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "ProblemDetails"
+      },
+      "type": "object"
+    },
+    "ImportOperationOfGoodsReceivalLine": {
+      "properties": {
+        "Lines": {
+          "items": {
+            "$ref": "#/definitions/GoodsReceivalLine"
+          },
+          "xml": {
+            "name": "GoodsReceivalLine",
+            "wrapped": true
+          },
+          "type": "array"
+        }
+      },
+      "xml": {
+        "name": "ImportOperation`1"
+      },
+      "type": "object"
+    },
+    "GoodsReceivalLine": {
+      "properties": {
+        "ExtReceivalListId": {
+          "description": "Uniquely identifies this goods receival list",
+          "example": "GR123456",
+          "type": "string"
+        },
+        "TransactionId": {
+          "description": "Unique ID for this transaction",
+          "example": "987654",
+          "type": "integer",
+          "format": "int32"
+        },
+        "Unnr": {
+          "description": "UN number for dangerous goods",
+          "example": "UN 1203",
+          "type": "string"
+        },
+        "ClientCode": {
+          "description": "Third-party client ID for 3PL scenarios",
+          "example": "CLIENT001",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 0
+        },
+        "OwnerCode": {
+          "description": "Owner of the product, used by 3PLs to identify client goods",
+          "example": "OWNER002",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 0
+        },
+        "PurchaseOrderId": {
+          "description": "Purchase order ID",
+          "example": "PO987654",
+          "type": "string"
+        },
+        "PurchaseOrderLineId": {
+          "description": "Specific line ID in the purchase order",
+          "example": "POL123",
+          "type": "string"
+        },
+        "ExtPicklistHeaderId": {
+          "description": "Header ID for CSV column mapping",
+          "example": "5678",
+          "type": "integer",
+          "format": "int32"
+        },
+        "ExtPicklistLineId": {
+          "description": "Unique identifier for each order line",
+          "example": "98765432",
+          "type": "integer",
+          "format": "int64"
+        },
+        "ExtOrderId": {
+          "description": "GR order number from customer's WMS/ERP system",
+          "example": "ORD123456",
+          "type": "string"
+        },
+        "ExtProductId": {
+          "description": "Product ID (SKU)",
+          "example": "SKU123456",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 0
+        },
+        "ProductScancodes": {
+          "description": "Comma-separated list of product scan codes",
+          "example": "123456,789012,345678",
+          "type": "string"
+        },
+        "MandatoryScan": {
+          "description": "Enforces SKU scanning during outbound",
+          "example": "true",
+          "type": "boolean"
+        },
+        "PriceNet": {
+          "description": "Net price of the item",
+          "example": "99.99",
+          "type": "number",
+          "format": "double"
+        },
+        "PriceGross": {
+          "description": "Gross price of the item",
+          "example": "119.99",
+          "type": "number",
+          "format": "double"
+        },
+        "ValidateQuantityAbove": {
+          "description": "Quantity threshold for pick validation",
+          "example": "10",
+          "type": "integer",
+          "format": "int32"
+        },
+        "UnmannedPickability": {
+          "description": "Pickability rating. Useful for Robotic Piece Picking",
+          "example": "2",
+          "type": "integer",
+          "format": "int32"
+        },
+        "FrequencyGroup": {
+          "description": "Pick frequency group (0-3: Unknown, A, B, C)",
+          "example": "1",
+          "type": "integer",
+          "format": "int32",
+          "maxLength": 0,
+          "minLength": 1
+        },
+        "ExtWarehouseId": {
+          "description": "Warehouse identifier",
+          "example": "WH001",
+          "type": "string"
+        },
+        "OrderTypeId": {
+          "description": "Order type identifier from ERP system",
+          "example": "PURCHASE",
+          "type": "string"
+        },
+        "OrderTypeText": {
+          "description": "Description of the order type",
+          "example": "Regular Purchase Order",
+          "type": "string"
+        },
+        "ProducerProductId": {
+          "description": "Producer's product ID",
+          "example": "PROD789",
+          "type": "string"
+        },
+        "ProductCategoryId": {
+          "description": "Product category ID",
+          "example": "CAT123",
+          "type": "string"
+        },
+        "VendorProductId": {
+          "description": "Vendor's product ID",
+          "example": "VEND456",
+          "type": "string"
+        },
+        "BatchId": {
+          "description": "Batch ID. Will only allocate orders from the batch specified during picking.",
+          "example": "BATCH2024-01",
+          "type": "string"
+        },
+        "Tariff": {
+          "description": "Currently undocumented",
+          "example": "15.5",
+          "type": "number",
+          "format": "double"
+        },
+        "OriginatingCountry": {
+          "description": "Country of origin",
+          "example": "NO",
+          "type": "string"
+        },
+        "ProductDesc": {
+          "description": "Description of the product",
+          "example": "White double light switch",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 0
+        },
+        "ProductName": {
+          "description": "Name of the product",
+          "example": "Double Light Switch",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 0
+        },
+        "Quantity": {
+          "description": "Quantity of items",
+          "example": "25",
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnit": {
+          "description": "Sales unit",
+          "example": "BOX",
+          "type": "string"
+        },
+        "SalesUnitPerLocation": {
+          "description": "If the pick strategy in eManager is set to 'D', eManager will consider the distribution pack size, trying to allocate from locations with whole packets.",
+          "example": "10",
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitsPerStockUnit": {
+          "description": "Number of sales units per stock unit",
+          "example": "12",
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitText": {
+          "description": "Text description of the sales unit",
+          "example": "Case of 12",
+          "type": "string"
+        },
+        "Revision": {
+          "description": "Product revision",
+          "example": "Rev2.1",
+          "type": "string"
+        },
+        "LotNo": {
+          "description": "Lot number",
+          "example": "LOT2024-03-15",
+          "type": "string"
+        },
+        "ExtLocationIdFrom": {
+          "description": "Source location ID",
+          "example": "RECV-01",
+          "type": "string"
+        },
+        "Quality": {
+          "description": "Quality status",
+          "example": "A-Grade",
+          "type": "string"
+        },
+        "ExpiryDate": {
+          "description": "Expiry date of the product",
+          "example": "2025-12-31",
+          "type": "string"
+        },
+        "ExtOrderlineId": {
+          "description": "A unique row identifier for the order line. If no ExtOrderId is provided, eManager will generate an internal ID.",
+          "example": "EXT-LINE-123",
+          "type": "string"
+        },
+        "AddedInfo": {
+          "description": "Additional information ID",
+          "example": "5",
+          "type": "integer",
+          "format": "int32"
+        },
+        "SerialNo": {
+          "description": "Serial number",
+          "example": "SN123456789",
+          "type": "string"
+        },
+        "NoPick": {
+          "description": "No pick flag",
+          "example": "1",
+          "type": "integer",
+          "format": "int32"
+        },
+        "DisplayExtProductId": {
+          "description": "Display product ID",
+          "example": "DISP-SKU-001",
+          "type": "string"
+        },
+        "EanId": {
+          "description": "EAN/Barcode",
+          "example": "5901234123457",
+          "type": "string"
+        },
+        "Weight": {
+          "description": "Weight in kilograms",
+          "example": "1.5",
+          "type": "number",
+          "format": "double"
+        },
+        "ExtId": {
+          "description": "External ID",
+          "example": "EXT-ID-001",
+          "type": "string"
+        },
+        "Volume": {
+          "description": "Volume",
+          "example": "0.5",
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitWeight": {
+          "description": "Weight of a single sales unit",
+          "example": "0.25",
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitWidth": {
+          "description": "Width of a single sales unit",
+          "example": "10",
+          "type": "integer",
+          "format": "int32"
+        },
+        "SalesUnitDepth": {
+          "description": "Depth of a single sales unit",
+          "example": "15",
+          "type": "integer",
+          "format": "int32"
+        },
+        "SalesUnitHeight": {
+          "description": "Height of a single sales unit",
+          "example": "5",
+          "type": "integer",
+          "format": "int32"
+        },
+        "SalesUnitVolume": {
+          "description": "Volume of a single sales unit",
+          "example": "0.75",
+          "type": "number",
+          "format": "double"
+        },
+        "Returned": {
+          "description": "Indicates if the item is a return",
+          "example": "true",
+          "type": "boolean"
+        },
+        "ExtPicklistId": {
+          "description": "Unique external picklist ID.",
+          "example": "PICK-123",
+          "type": "string"
+        },
+        "ExpiryDateRequired": {
+          "description": "When you have an orderline with ExpiryDateRequired=1 the operator must enter the expiry date manually before performing putaway.",
+          "example": "1",
+          "type": "integer",
+          "format": "int32"
+        },
+        "Vendor": {
+          "description": "Vendor/Supplier information",
+          "example": "SupplierXYZ",
+          "type": "string"
+        },
+        "DeliveryIndex": {
+          "description": "A custom data field without functionality. Accepted as an import and included in exports",
+          "example": "DEL-001",
+          "type": "string"
+        },
+        "CustLocationId": {
+          "description": "Customer-specific location ID",
+          "example": "CUST-LOC-A1",
+          "type": "string"
+        },
+        "CustOrderId": {
+          "description": "Customer order ID for crossdocking",
+          "example": "CUST-ORD-456",
+          "type": "string"
+        },
+        "OrderlineNote": {
+          "description": "Note for the order line",
+          "example": "Handle with care",
+          "type": "string"
+        },
+        "ImageId": {
+          "description": "Image identifier",
+          "example": "IMG-123456",
+          "type": "string"
+        },
+        "Invoice": {
+          "description": "Invoice information",
+          "example": "INV-20240305-001",
+          "type": "string"
+        },
+        "HandlingUnitScanCode": {
+          "description": "Scan code for the handling unit containing the entire GR line quantity",
+          "example": "HU-SCAN-789",
+          "type": "string"
+        },
+        "ScanCode": {
+          "description": "Unique scan code for the GR line, used during putaway",
+          "example": "GR-SCAN-456",
+          "type": "string"
+        },
+        "Action": {
+          "description": "Action to be performed on the line",
+          "example": "D",
+          "type": "string"
+        },
+        "AllowDuplicates": {
+          "description": "Flag to allow duplicate entries",
+          "example": "true",
+          "type": "boolean"
+        },
+        "ExtOrderlineSubId": {
+          "description": "External order line sub-ID",
+          "example": "123456789",
+          "type": "integer",
+          "format": "int64"
+        },
+        "CustomData": {
+          "description": "Custom data key-value pairs",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "example": "{\r\n  \"CustomField1\": \"Value1\",\r\n  \"CustomField2\": \"Value2\"\r\n}",
+          "type": "object"
+        },
+        "CustomAllocationData": {
+          "description": "Custom allocation data key-value pairs",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "example": "{\r\n  \"AllocField1\": \"AllocValue1\",\r\n  \"AllocField2\": \"AllocValue2\"\r\n}",
+          "type": "object"
+        },
+        "StockReservationKey": {
+          "description": "Key for stock reservation. \r\nThis stock will be locked, and can only be assigned to pick orders requesting reservations with that specific StockReservationKey.",
+          "example": "RESV-KEY-001",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 0
+        },
+        "LockStockForPicking": {
+          "description": "Flag to lock received stock for picking",
+          "example": "true",
+          "type": "boolean"
+        },
+        "QuantityVerificationThreshold": {
+          "description": "Threshold for quantity verification at a location",
+          "example": "5.0",
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "xml": {
+        "name": "GoodsReceivalLine"
+      },
+      "type": "object"
+    },
+    "ImportOperationOfInventoryLine": {
+      "properties": {
+        "Lines": {
+          "items": {
+            "$ref": "#/definitions/InventoryLine"
+          },
+          "xml": {
+            "name": "InventoryLine",
+            "wrapped": true
+          },
+          "type": "array"
+        }
+      },
+      "xml": {
+        "name": "ImportOperation`1"
+      },
+      "type": "object"
+    },
+    "InventoryLine": {
+      "properties": {
+        "ReferenceName": {
+          "description": "A name for referencing the inventory count",
+          "type": "string"
+        },
+        "ExtProductId": {
+          "description": "The SKU number to count",
+          "type": "string"
+        },
+        "ExpiryDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "BatchId": {
+          "type": "string"
+        },
+        "OwnerCode": {
+          "type": "string"
+        },
+        "ClientCode": {
+          "type": "string"
+        },
+        "StockReservationKey": {
+          "type": "string"
+        },
+        "ExtLocationId": {
+          "description": "The code of the location",
+          "type": "string"
+        },
+        "HandlingUnitScanCode": {
+          "type": "string"
+        },
+        "HandlingUnitQuantity": {
+          "type": "number",
+          "format": "double"
+        },
+        "CustomAllocationData": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "CustomData": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "TransactionId": {
+          "description": "A unique identifier for the import transaction. Optional.",
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "xml": {
+        "name": "InventoryLine"
+      },
+      "type": "object"
+    },
+    "AllocationDataChanges": {
+      "properties": {
+        "Filter": {
+          "$ref": "#/definitions/AllocationDataFilter",
+          "readOnly": true
+        },
+        "Updates": {
+          "$ref": "#/definitions/AllocationDataUpdates",
+          "readOnly": true
+        }
+      },
+      "xml": {
+        "name": "AllocationDataChanges"
+      },
+      "type": "object"
+    },
+    "AllocationDataFilter": {
+      "properties": {
+        "SkuNumber": {
+          "type": "string"
+        },
+        "Location": {
+          "type": "string"
+        },
+        "HandlingUnit": {
+          "type": "string"
+        },
+        "ExpiryDate": {
+          "type": "string"
+        },
+        "Batch": {
+          "type": "string"
+        },
+        "Owner": {
+          "type": "string"
+        },
+        "Client": {
+          "type": "string"
+        },
+        "LotNo": {
+          "type": "string"
+        },
+        "Revision": {
+          "type": "string"
+        },
+        "StockReservationKey": {
+          "type": "string"
+        },
+        "Quality": {
+          "type": "string"
+        },
+        "CustomAllocationData": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "xml": {
+        "name": "AllocationDataFilter"
+      },
+      "type": "object"
+    },
+    "AllocationDataUpdates": {
+      "properties": {
+        "ExpiryDate": {
+          "type": "string"
+        },
+        "Batch": {
+          "type": "string"
+        },
+        "Owner": {
+          "type": "string"
+        },
+        "Client": {
+          "type": "string"
+        },
+        "LotNo": {
+          "type": "string"
+        },
+        "Revision": {
+          "type": "string"
+        },
+        "StockReservationKey": {
+          "type": "string"
+        },
+        "Quality": {
+          "type": "string"
+        },
+        "CustomAllocationData": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "xml": {
+        "name": "AllocationDataUpdates"
+      },
+      "type": "object"
+    },
+    "UpdateAllocationDataResponse": {
+      "description": "Response object containing number of matched and updated locations",
+      "properties": {
+        "TotalMatches": {
+          "description": "Total number of matched locations",
+          "readOnly": true,
+          "type": "integer",
+          "format": "int32"
+        },
+        "TotalUpdates": {
+          "description": "Total number of updated locations",
+          "readOnly": true,
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "xml": {
+        "name": "UpdateAllocationDataResponse"
+      },
+      "type": "object"
+    },
+    "LockProductsForPickingRequest": {
+      "required": [
+        "Products"
+      ],
+      "properties": {
+        "Products": {
+          "items": {
+            "$ref": "#/definitions/ProductForLocking"
+          },
+          "xml": {
+            "name": "ProductForLocking",
+            "wrapped": true
+          },
+          "type": "array"
+        }
+      },
+      "xml": {
+        "name": "LockProductsForPickingRequest"
+      },
+      "type": "object"
+    },
+    "ProductForLocking": {
+      "required": [
+        "ExtProductId"
+      ],
+      "properties": {
+        "ExtProductId": {
+          "type": "string"
+        },
+        "BatchId": {
+          "type": "string"
+        },
+        "ExpiryDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "Owner": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "ProductForLocking"
+      },
+      "type": "object"
+    },
+    "UnlockProductsForPickingRequest": {
+      "required": [
+        "Products"
+      ],
+      "properties": {
+        "Products": {
+          "items": {
+            "$ref": "#/definitions/ProductForUnlocking"
+          },
+          "xml": {
+            "name": "ProductForUnlocking",
+            "wrapped": true
+          },
+          "type": "array"
+        }
+      },
+      "xml": {
+        "name": "UnlockProductsForPickingRequest"
+      },
+      "type": "object"
+    },
+    "ProductForUnlocking": {
+      "required": [
+        "ExtProductId"
+      ],
+      "properties": {
+        "ExtProductId": {
+          "type": "string"
+        },
+        "BatchId": {
+          "type": "string"
+        },
+        "ExpiryDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "Owner": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "ProductForUnlocking"
+      },
+      "type": "object"
+    },
+    "RemoveStockItemReservationKeyRequestModel": {
+      "required": [
+        "StockReservationKey",
+        "ExtProductId"
+      ],
+      "properties": {
+        "StockReservationKey": {
+          "type": "string"
+        },
+        "ExtProductId": {
+          "type": "string"
+        },
+        "BatchId": {
+          "type": "string"
+        },
+        "Owner": {
+          "type": "string"
+        },
+        "ExpiryDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "HandlingUnitScanCode": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "RemoveStockItemReservationKeyRequestModel"
+      },
+      "type": "object"
+    },
+    "ImportOperationOfPickListLineImport": {
+      "properties": {
+        "Lines": {
+          "items": {
+            "$ref": "#/definitions/PickListLineImport"
+          },
+          "xml": {
+            "name": "PickListLineImport",
+            "wrapped": true
+          },
+          "type": "array"
+        }
+      },
+      "xml": {
+        "name": "ImportOperation`1"
+      },
+      "type": "object"
+    },
+    "PickListLineImport": {
+      "properties": {
+        "TransactionId": {
+          "description": "Unique ID for this transaction. Unique id for picklist. Key value for the picklist.",
+          "example": "987654",
+          "type": "integer",
+          "format": "int32"
+        },
+        "ExtPicklistId": {
+          "description": "Unique id for picklist. Key value for the picklist.",
+          "example": "987654",
+          "type": "string"
+        },
+        "ExtOrderId": {
+          "description": "Picking order number from customer's WMS/ERP system",
+          "example": "ORD123456",
+          "type": "string"
+        },
+        "ExtOrderlineId": {
+          "description": "A unique row identifier for the order line. If no ExtOrderId is provided, eManager will generate an internal ID.",
+          "example": "EXT-LINE-123",
+          "type": "integer",
+          "format": "int64"
+        },
+        "ExtOrderlineSubId": {
+          "description": "Second identifier for the order line. Used if there are multiple levels of picklist identifiers",
+          "example": "EXT-LINE-123",
+          "type": "integer",
+          "format": "int64"
+        },
+        "ExtProductId": {
+          "description": "Product ID (SKU)",
+          "example": "SKU123456",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 0
+        },
+        "ProductName": {
+          "description": "Name of the product",
+          "example": "Double Light Switch",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 0
+        },
+        "ProductDesc": {
+          "description": "Description of the product",
+          "example": "White double light switch",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 0
+        },
+        "ExtLocationId": {
+          "description": "If provided, quantity will only be allocated from the specified location",
+          "example": "AS-100016-01-01",
+          "type": "string"
+        },
+        "Quantity": {
+          "description": "The quantity to pick",
+          "example": "12",
+          "type": "number",
+          "format": "double"
+        },
+        "CustId": {
+          "description": "ID of the customer placing the order.\r\nGDPR sensitive property. Not logged with 'log4net'.",
+          "example": "45781",
+          "type": "string"
+        },
+        "CustName": {
+          "description": "Name of the customer placing the order.\r\nGDPR sensitive property. Not logged with 'log4net'.",
+          "example": "Acme Inc",
+          "type": "string"
+        },
+        "PicklistConsolidationLocation": {
+          "description": "Set a static consolidation location",
+          "example": "A32",
+          "type": "string"
+        },
+        "SpeditorId": {
+          "description": "Id of a shipper",
+          "example": "ELS4234NO",
+          "type": "string"
+        },
+        "SpeditorText": {
+          "description": "Name of a shipper",
+          "example": "ElLogic Shippers ASA",
+          "type": "string"
+        },
+        "SalesUnitPerLocation": {
+          "description": "If the pick strategy in eManager is set to 'D', eManager will consider the distribution pack size, trying to allocate from locations with whole packets.",
+          "example": "10",
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitsPerStockUnit": {
+          "description": "Number of sales units per stock unit",
+          "example": "12",
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitText": {
+          "description": "Text description of the sales unit",
+          "example": "Case of 12",
+          "type": "string"
+        },
+        "OrderTypeId": {
+          "description": "Order type identifier from ERP system",
+          "example": "PURCHASE",
+          "type": "string"
+        },
+        "OrderTypeText": {
+          "description": "Description of the order type",
+          "example": "Regular Purchase Order",
+          "type": "string"
+        },
+        "ProducerProductId": {
+          "description": "Producer's product ID",
+          "example": "PROD789",
+          "type": "string"
+        },
+        "Complete": {
+          "description": "Currently undocumented",
+          "example": "Partially",
+          "type": "string"
+        },
+        "OrderPriority": {
+          "description": "When replenishing AutoStore with task groups, request time is primarily used. If request times are equal, OrderPriority is considered next.\r\nPicklists with the lowest OrderPriority will be prioritized.",
+          "example": "1",
+          "type": "integer",
+          "format": "int32"
+        },
+        "Text1": {
+          "description": "Information stored on orderlinelevel.",
+          "example": "This is the greatest orderline ever",
+          "type": "string"
+        },
+        "BatchId": {
+          "description": "Batch ID. Will only allocate orders from the batch specified.",
+          "example": "BATCH2024-01",
+          "type": "string"
+        },
+        "Tariff": {
+          "description": "Currently undocumented",
+          "example": "15.5",
+          "type": "number",
+          "format": "double"
+        },
+        "OriginatingCountry": {
+          "description": "Country of origin",
+          "example": "NO",
+          "type": "string"
+        },
+        "Volume": {
+          "description": "Volume",
+          "example": "0.5",
+          "type": "number",
+          "format": "double"
+        },
+        "Weight": {
+          "description": "Weight in kilograms",
+          "example": "1.5",
+          "type": "number",
+          "format": "double"
+        },
+        "YourRef": {
+          "description": "External reference field.\r\nGDPR sensitive property. Not logged with log4net.",
+          "example": "Steve",
+          "type": "string"
+        },
+        "OurRef": {
+          "description": "External reference field.\r\nGDPR sensitive property. Not logged with log4net.",
+          "example": "Summer promotion",
+          "type": "string"
+        },
+        "ExtPickDate": {
+          "description": "Combined with ExtPickTime, this can be used in calculating Pick Order Request Time, given that the MEGAPARAM configuration setting Picking.Requesttime.InitializeFrom.Date is set to 1\r\n            \r\nyyyyMMdd",
+          "example": "20241224",
+          "type": "string"
+        },
+        "ExtPickTime": {
+          "description": "Combined with ExtPickDate, this can be used in calculating Pick Order Request Time, given that the MEGAPARAM configuration setting Picking.Requesttime.InitializeFrom.Time is set to 3\r\n            \r\nhhmmss",
+          "example": "183000",
+          "type": "string"
+        },
+        "DelDate": {
+          "description": "Delivery Date. Used for label information.\r\nA pure text field that supports any format",
+          "example": "12-24-2024",
+          "type": "string"
+        },
+        "DelTime": {
+          "description": "Delivery Time. Used for label information.\r\nA pure text field that supports any format",
+          "example": "12:43:23",
+          "type": "string"
+        },
+        "DelCompCode": {
+          "description": "Delivery company code.",
+          "type": "string"
+        },
+        "DelName": {
+          "description": "Delivery name. Used for label purposes\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DelAddr1": {
+          "description": "Delivery address. Used for label purposes\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DelAddr2": {
+          "description": "Delivery address part 2. Used for label purposes\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DelCity": {
+          "description": "Delivery address part 3. Used for label purposes\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DelPostCode": {
+          "description": "Delivery city. Used for label purposes\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DelCountry": {
+          "description": "Delivery post code. Used for label purposes\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DevName": {
+          "description": "Delivery country. Used for label purposes\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DevAddr1": {
+          "description": "GDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DevAddr2": {
+          "description": "Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DevPostCode": {
+          "description": "Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DevCity": {
+          "description": "Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "DevCountry": {
+          "description": "Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "InvCompCode": {
+          "description": "Invoice company code. Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "InvName": {
+          "description": "Invoice name. Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "InvAddr1": {
+          "description": "Invoice address 1. Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "InvAddr2": {
+          "description": "Invoice address 2. Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "InvPostCode": {
+          "description": "Invoice post code. Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "InvCity": {
+          "description": "Invoice city. Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "InvCountry": {
+          "description": "Invoice country. Used for label priting.\r\nGDPR sensitive property. Not logged with log4net.",
+          "type": "string"
+        },
+        "OrderDate": {
+          "description": "Combined with OrderTime, this can be used in calculating Pick Order Request Time, given that the MEGAPARAM configuration setting Picking.Requesttime.InitializeFrom.Date is set to 2\r\nyyyyMMdd",
+          "example": "20240630",
+          "type": "string"
+        },
+        "OrderTime": {
+          "description": "Combined with OrderDate, this can be used in calculating Pick Order Request Time, given that the MEGAPARAM configuration setting Picking.Requesttime.InitializeFrom.Time is set to 2\r\nhhmmss",
+          "example": "183000",
+          "type": "string"
+        },
+        "ExtPicklistLineId": {
+          "description": "Unique identifier for each order line",
+          "example": "10",
+          "type": "integer",
+          "format": "int64"
+        },
+        "ExtPicklistHeaderId": {
+          "description": "Header ID for CSV column mapping",
+          "example": "10",
+          "type": "integer",
+          "format": "int32"
+        },
+        "OrderLineNote": {
+          "description": "Note for the order line",
+          "example": "Handle with care",
+          "type": "string"
+        },
+        "OrderLineNote2": {
+          "description": "Sub note for the order line",
+          "example": "Right side up",
+          "type": "string"
+        },
+        "CustLocationId": {
+          "description": "Customer-specific location ID",
+          "example": "CUST-LOC-A1",
+          "type": "string"
+        },
+        "Info1": {
+          "description": "Used in exports. Can be configured to be visible in the picking UI",
+          "example": "Useful info goes here",
+          "type": "string"
+        },
+        "Info2": {
+          "description": "Used in exports. Can be configured to be visible in the picking UI",
+          "example": "More info goes here",
+          "type": "string"
+        },
+        "Info3": {
+          "description": "Used in exports. Can be configured to be visible in the picking UI",
+          "example": "Even more info goes here",
+          "type": "string"
+        },
+        "Info4": {
+          "description": "Used in exports. Can be configured to be visible in the picking UI",
+          "example": "The last info goes here",
+          "type": "string"
+        },
+        "OrderText1": {
+          "description": "Often used for instructions. Can be configured to be visible in the picking UI",
+          "example": "Pack this in a specific way",
+          "type": "string"
+        },
+        "OrderText2": {
+          "description": "Often used for instructions. Can be configured to be visible in the picking UI",
+          "example": "This is shipped to Sentinel Island",
+          "type": "string"
+        },
+        "Discount": {
+          "description": "Discount on the item",
+          "example": "119.99",
+          "type": "number",
+          "format": "double"
+        },
+        "Sequence": {
+          "description": "Picking order. It determines the sequence AutoStore presents bins in.\r\nThe sequence identifier is a string, and need not be unique.\r\nIf all the lines in an order have either the sequence identifier \"A\" or the sequence identifier \"B\", all the lines with \"A\" will be picked before all the lines with \"B\".\r\nSorted as strings, so '11' will be picked before '2'.\r\nSequence can be used e.g. to pick heavy goods before lighter goods.\r\n            \r\nNOTE: Using sequence identifiers impacts performance, and should only be used when absolutely necessary.",
+          "example": "A",
+          "type": "string"
+        },
+        "Boxtype": {
+          "description": "The name of the boxtype.\r\nIf set, the boxtype will be chosen for the picklistline and shown in the UI if configured.\r\nIf the boxtype doesn't exist, a new boxtype will automatically be created.",
+          "example": "XL Box",
+          "type": "string"
+        },
+        "ShipmentId": {
+          "description": "ID for shipments. Used in exports",
+          "example": "203",
+          "type": "integer",
+          "format": "int32"
+        },
+        "TmsCustomerId": {
+          "description": "Customer ID used for TMS purposes",
+          "example": "TMS-203",
+          "type": "string"
+        },
+        "IncoTerm": {
+          "description": "ID of IncoTerm rule. https://en.wikipedia.org/wiki/Incoterms",
+          "example": "CIF",
+          "type": "string"
+        },
+        "IncoTermText": {
+          "description": "Text for IncoTerm rule. https://en.wikipedia.org/wiki/Incoterms",
+          "example": "Cost, Insurance and Freight",
+          "type": "string"
+        },
+        "Unnr": {
+          "description": "UN number for dangerous goods",
+          "example": "UN 1203",
+          "type": "string"
+        },
+        "OwnerCode": {
+          "description": "Owner of the product, used by 3PLs to identify client goods",
+          "example": "OWNER002",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 0
+        },
+        "ClientCode": {
+          "description": "Third-party client ID for 3PL scenarios",
+          "example": "CLIENT001",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 0
+        },
+        "ProductLabels": {
+          "description": "Number of copies of the product lables to print.\r\nNot set will print nothing\r\n0 or less will print the same amount as items picked\r\nMore than 0 will print the amount defined",
+          "example": "0",
+          "type": "integer",
+          "format": "int32"
+        },
+        "Scancode": {
+          "description": "Scan code for the box",
+          "example": "BOX01",
+          "type": "string"
+        },
+        "ProductScancodes": {
+          "description": "Comma-separated list of product scan codes",
+          "example": "123456,789012,345678",
+          "type": "string"
+        },
+        "PackValidationScanCode": {
+          "type": "string"
+        },
+        "MandatoryScan": {
+          "description": "Enforces SKU scanning during outbound",
+          "example": "true",
+          "type": "boolean"
+        },
+        "CustOrderId": {
+          "description": "Customer order ID for crossdocking",
+          "example": "CUST-ORD-456",
+          "type": "string"
+        },
+        "StockReservationKey": {
+          "description": "Key for stock reservation.\r\nThis stock will be locked, and can only be assigned to pick orders requesting reservations with that specific StockReservationKey.",
+          "example": "RESV-KEY-001",
+          "type": "string"
+        },
+        "StockAvailabilityHandling": {
+          "description": "Defines what to do with incomplete picked order lines.\r\nUsed to override the value of the StockAvailabilityHandling parameter.\r\n            \r\n*AllowPartial* - Allows lines to be partially assigned and still proceed to be picked - this is generally not recommended at this can cause the order to be split into multiple taskgroups and thereby multiple deliveries, which is generally not desired.\r\n*WaitForComplete* - Will keep the line in unassigned until all the quantity can be assigned. NOTE: parameter \"Integration.BalanceCorrection.External\" needs to be disabled when using this setting.\r\n*FinishRestQuantity* - Will automatically finish the part of the quantity that can not be picked and allow the remaining quantity to be picked.\r\n*FinishIncomplete (default)* - automatically finish lines where we cannot pick the full quantity.",
+          "example": "RESV-KEY-001",
+          "type": "string"
+        },
+        "AddedInfo": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "VendorProductId": {
+          "description": "Vendor's product ID",
+          "example": "VEND456",
+          "type": "string"
+        },
+        "DisplayExtProductId": {
+          "description": "Display product ID",
+          "example": "DISP-SKU-001",
+          "type": "string"
+        },
+        "EanId": {
+          "description": "EAN/Barcode",
+          "example": "5901234123457",
+          "type": "string"
+        },
+        "ExtId": {
+          "description": "External ID",
+          "example": "EXT-ID-001",
+          "type": "string"
+        },
+        "ExpiryDateRequired": {
+          "description": "When you have an orderline with ExpiryDateRequired=1 the operator must enter the expiry date manually before performing putaway.",
+          "example": "1",
+          "type": "integer",
+          "format": "int32"
+        },
+        "ExpiryDateFilter": {
+          "description": "limits the available stock items to those that have an expiry date that falls within the range of the filter\r\nUsed to filter by specific dates or an interval. Example: in order to get items that are expiring 2 days from today to 7 days from today.\r\nExplicit dates can also be used, such as: 2022.08.23..2022.08.27.",
+          "example": "2",
+          "type": "string"
+        },
+        "ExtWarehouseId": {
+          "description": "Warehouse identifier",
+          "example": "WH001",
+          "type": "string"
+        },
+        "PriceGross": {
+          "description": "Gross price of the item",
+          "example": "119.99",
+          "type": "number",
+          "format": "double"
+        },
+        "PriceNet": {
+          "description": "Net price of the item",
+          "example": "99.99",
+          "type": "number",
+          "format": "double"
+        },
+        "ProductCategoryId": {
+          "description": "Product category ID",
+          "example": "CAT123",
+          "type": "string"
+        },
+        "SalesUnitWeight": {
+          "description": "Weight of a single sales unit",
+          "example": "0.25",
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitWidth": {
+          "description": "Width of a single sales unit",
+          "example": "0.25",
+          "type": "integer",
+          "format": "int32"
+        },
+        "SalesUnitDepth": {
+          "description": "Depth of a single sales unit",
+          "example": "0.25",
+          "type": "integer",
+          "format": "int32"
+        },
+        "SalesUnitHeight": {
+          "description": "Height of a single sales unit",
+          "example": "0.25",
+          "type": "integer",
+          "format": "int32"
+        },
+        "SalesUnitVolume": {
+          "description": "Volume of a single sales unit",
+          "example": "0.25",
+          "type": "number",
+          "format": "double"
+        },
+        "InvoiceAmount": {
+          "description": "Invoice amount. Used often to map price per location",
+          "example": "123.23",
+          "type": "number",
+          "format": "double"
+        },
+        "TotalInvoiceAmount": {
+          "description": "Total invoice amount. Used often by 3PLs",
+          "example": "123.23",
+          "type": "number",
+          "format": "double"
+        },
+        "InvoiceNumber": {
+          "description": "Total invoice amount. Used often by 3PLs",
+          "example": "INV-123",
+          "type": "string"
+        },
+        "ReceiverMail": {
+          "description": "Email of the reciever\r\nGDPR sensitive property. Not logged with log4net.",
+          "example": "+4722225555",
+          "type": "string"
+        },
+        "ReceiverPhone": {
+          "description": "Phone of the reciever\r\nGDPR sensitive property. Not logged with log4net.",
+          "example": "support@elementlogic.net",
+          "type": "string"
+        },
+        "SenderMail": {
+          "description": "Mail of the sender\r\nGDPR sensitive property. Not logged with log4net.",
+          "example": "+4722225555",
+          "type": "string"
+        },
+        "SenderPhone": {
+          "description": "Phone of the sender\r\nGDPR sensitive property. Not logged with log4net.",
+          "example": "support@elementlogic.net",
+          "type": "string"
+        },
+        "ImageId": {
+          "description": "URL to an image",
+          "example": "file://path",
+          "type": "string"
+        },
+        "WorkOrderId": {
+          "description": "Information field",
+          "example": "WOI-123",
+          "type": "string"
+        },
+        "ValidateQuantityAbove": {
+          "description": "Set to alert the user if quantity to pick is above the quantity defined.",
+          "example": "2",
+          "type": "integer",
+          "format": "int32"
+        },
+        "UnmannedPickability": {
+          "description": "Pickability rating. Useful for Robotic Piece Picking",
+          "example": "2",
+          "type": "integer",
+          "format": "int32"
+        },
+        "FrequencyGroup": {
+          "description": "Pick frequency group (0-3: Unknown, A, B, C)\r\nUsed during putaway to put items of the same frequency group in the same bin.",
+          "example": "1",
+          "type": "integer",
+          "format": "int32",
+          "maxLength": 0,
+          "minLength": 1
+        },
+        "CustomData": {
+          "description": "Custom data key-value pairs",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "example": "{\r\n  \"CustomField1\": \"Value1\",\r\n  \"CustomField2\": \"Value2\"\r\n}",
+          "type": "object"
+        },
+        "CustomAllocationData": {
+          "description": "This field can be used to send key value pairs to eManager (e.g. \"CustomData\": {\"key1\": \"value1\", \"key2\": \"value2\"}\r\nThe data will be saved in a PUTAWAYORDERLINECUSTOMALLOCATIONDATA table with a foreign key to picklistline.\r\nThe CustomAllocationData properties will be stored on the product location during putaway and can be used to\r\nallocate pick locations. Max length : 500.\r\nThe CustomAllocationData element may contain any number of items.",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "PicklistLookupCode": {
+          "description": "A code that can be set to make it easier to look up the specific picklist in the \"Pick Single Picklist\"\r\ncategory from the task menu, if the Picking.FindPicklistByLookupCodeEnabled parameter is enabled.",
+          "example": "CUSTOM-CODE-1234",
+          "type": "string"
+        },
+        "SalesUnit": {
+          "description": "Deprecated. Use SalesUnitText instead.",
+          "type": "string"
+        },
+        "QuantityVerificationThreshold": {
+          "description": "Value for a threshold that will force counting when the balance at a location is at or below that threshold.\r\nNote that this feature does not work with Handling Units",
+          "example": "50",
+          "type": "number",
+          "format": "double"
+        },
+        "HandlingUnitScanCode": {
+          "description": "The code of the hanadling unit to be picked. This is a unique code for a specific unique handling unit in the system.",
+          "example": "HU12345",
+          "type": "string"
+        },
+        "HandlingUnitStrategy": {
+          "description": "A field used to indicate the type of strategy used to pick handling units for the picklistline.\r\nThe value will default to \"10\" if not set which means that the handling unit to be picked will always be picked in full,\r\nwhich was the default behaviour before this property was introduced\r\n(e.g. quantity to be picked is 10, and the handling unit contains 20, users will be forced to pick the full handling unit).\r\nWhile a value of \"20\" will allow the handling unit to be picked in parts\r\n(e.g. quantity to be picked is 10, but the handling unit contains 20,\r\nusers will be allowed to split the handling unit and only pick the partial handling unit).",
+          "example": "20",
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "PickListLineImport"
+      },
+      "type": "object"
+    },
+    "ScanCodes": {
+      "description": "List of ScanCodes",
+      "properties": {
+        "Codes": {
+          "description": "List of all scan codes",
+          "items": {
+            "$ref": "#/definitions/ScanCode"
+          },
+          "xml": {
+            "name": "ScanCode",
+            "wrapped": true
+          },
+          "type": "array"
+        }
+      },
+      "xml": {
+        "name": "ScanCodes"
+      },
+      "type": "object"
+    },
+    "ScanCode": {
+      "description": "Defines a scan code with type",
+      "properties": {
+        "Code": {
+          "description": "String representation of the code it self",
+          "type": "string"
+        },
+        "Type": {
+          "description": "Type of the scan code",
+          "type": "string",
+          "enum": [
+            "Unknown",
+            "Ean",
+            "HandlingUnit"
+          ]
+        },
+        "Quantity": {
+          "description": "Type of the scan code",
+          "type": "number",
+          "format": "double"
+        },
+        "PackageTypeName": {
+          "description": "Package type name",
+          "type": "string"
+        },
+        "PackageWeight": {
+          "description": "Package weight in kilograms",
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "xml": {
+        "name": "ScanCode"
+      },
+      "type": "object"
+    },
+    "ImportOperationOfProductLine": {
+      "properties": {
+        "Lines": {
+          "items": {
+            "$ref": "#/definitions/ProductLine"
+          },
+          "xml": {
+            "name": "ProductLine",
+            "wrapped": true
+          },
+          "type": "array"
+        }
+      },
+      "xml": {
+        "name": "ImportOperation`1"
+      },
+      "type": "object"
+    },
+    "ProductLine": {
+      "properties": {
+        "DisplayExtProductId": {
+          "type": "string"
+        },
+        "EanId": {
+          "type": "string"
+        },
+        "ExpiryDateRequired": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "ExtId": {
+          "type": "string"
+        },
+        "ExtProductId": {
+          "type": "string"
+        },
+        "ExtWarehouseId": {
+          "type": "string"
+        },
+        "ProducerProductId": {
+          "type": "string"
+        },
+        "ProductCategoryId": {
+          "type": "string"
+        },
+        "ProductDesc": {
+          "type": "string"
+        },
+        "ProductName": {
+          "type": "string"
+        },
+        "SalesUnit": {
+          "type": "string"
+        },
+        "SalesUnitDepth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "SalesUnitHeight": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "SalesUnitPerLocation": {
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitsPerStockUnit": {
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitText": {
+          "type": "string"
+        },
+        "InitialSalesUnit": {
+          "type": "string"
+        },
+        "SalesUnitVolume": {
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitWeight": {
+          "type": "number",
+          "format": "double"
+        },
+        "SalesUnitWidth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "TransactionId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Unnr": {
+          "type": "string"
+        },
+        "VendorProductId": {
+          "type": "string"
+        },
+        "BatchId": {
+          "type": "string"
+        },
+        "Tariff": {
+          "type": "number",
+          "format": "double"
+        },
+        "OriginatingCountry": {
+          "type": "string"
+        },
+        "ImageId": {
+          "type": "string"
+        },
+        "Scancodes": {
+          "type": "string"
+        },
+        "MandatoryScan": {
+          "type": "boolean"
+        },
+        "PriceNet": {
+          "type": "number",
+          "format": "double"
+        },
+        "PriceGross": {
+          "type": "number",
+          "format": "double"
+        },
+        "ValidateQuantityAbove": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "UnmannedPickability": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "FrequencyGroup": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "DocumentReference": {
+          "readOnly": true,
+          "type": "string"
+        },
+        "Quantity": {
+          "type": "number",
+          "format": "double"
+        },
+        "QuantityVerificationThreshold": {
+          "type": "number",
+          "format": "double"
+        },
+        "DistributionPacks": {
+          "items": {
+            "$ref": "#/definitions/DistributionPack"
+          },
+          "xml": {
+            "name": "DistributionPack",
+            "wrapped": true
+          },
+          "type": "array"
+        },
+        "MaximumQuantityPerLocationType": {
+          "items": {
+            "$ref": "#/definitions/MaximumQuantityInformation"
+          },
+          "xml": {
+            "name": "MaximumQuantityInformation",
+            "wrapped": true
+          },
+          "type": "array"
+        }
+      },
+      "xml": {
+        "name": "ProductLine"
+      },
+      "type": "object"
+    },
+    "DistributionPack": {
+      "properties": {
+        "EanId": {
+          "type": "string"
+        },
+        "Quantity": {
+          "type": "number",
+          "format": "double"
+        },
+        "PackageTypeName": {
+          "type": "string"
+        },
+        "PackageWeight": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "xml": {
+        "name": "DistributionPack"
+      },
+      "type": "object"
+    },
+    "MaximumQuantityInformation": {
+      "properties": {
+        "LocationTypeName": {
+          "type": "string"
+        },
+        "MaximumQuantity": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "xml": {
+        "name": "MaximumQuantityInformation"
+      },
+      "type": "object"
+    }
+  },
+  "securityDefinitions": {
+    "Basic": {
+      "type": "basic",
+      "description": "Basic HTTP Authentication"
+    }
+  },
+  "tags": [
+    {
+      "name": "DirectPutaway",
+      "description": "Endpoint for direct putaway tasks"
+    },
+    {
+      "name": "GoodsReceivals",
+      "description": "Endpoint for goods receival"
+    },
+    {
+      "name": "GoodsReceivalsImport",
+      "description": "Endpoint for importing goods receival lists."
+    },
+    {
+      "name": "ImportRouter",
+      "description": "Endpoint for unpacking incoming messages and routing them to the correct endpoint based on message content"
+    },
+    {
+      "name": "IntegrationStatus",
+      "description": "Endpoint for looking up status of integration transactions."
+    },
+    {
+      "name": "InventoryCountImport",
+      "description": "Endpoint for importing inventory count with transformation support."
+    },
+    {
+      "name": "InventoryItems",
+      "description": "Endpoint for inventory items"
+    },
+    {
+      "name": "MessageRoutings",
+      "description": "Endpoint for routing messages to another endpoint based on a predefined routing rule"
+    },
+    {
+      "name": "PickListLines",
+      "description": "Endpoint for picklist lines"
+    },
+    {
+      "name": "PickLists",
+      "description": "Endpoint for picklists"
+    },
+    {
+      "name": "PicklistsImport",
+      "description": "Endpoint for importing picklist with transformation support."
+    },
+    {
+      "name": "Pickwaves",
+      "description": "Endpoint for pickwaves"
+    },
+    {
+      "name": "Products",
+      "description": "Endpoint for importing products."
+    },
+    {
+      "name": "ProductsImport",
+      "description": "Endpoint for importing products with transformation support."
+    },
+    {
+      "name": "Root"
+    },
+    {
+      "name": "UnpreparedRefillActivities",
+      "description": "Endpoint for unprepared refill activities"
+    }
+  ]
+}
